@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { type AppUser, getSession, logout } from "@/lib/users";
 import Login from "@/components/Login";
 import { usePlan } from "@/hooks/usePlan";
-import { WEEK_DAYS, exerciseName } from "@/lib/workouts";
+import { WEEK_DAYS, type DayWorkout } from "@/lib/workouts";
 import ExerciseCard from "@/components/ExerciseCard";
 import CalendarView from "@/components/CalendarView";
 import LeaderEditor from "@/components/LeaderEditor";
@@ -154,7 +154,7 @@ const Index = () => {
 };
 
 function DayDetail({ dayPlan, dayLabel, isLeader, onReplace }:{
-  dayPlan: ReturnType<typeof exerciseName> extends never ? never : any;
+  dayPlan: DayWorkout | undefined;
   dayLabel: string;
   isLeader: boolean;
   onReplace: (i: number, newId: string) => void;
@@ -176,7 +176,7 @@ function DayDetail({ dayPlan, dayLabel, isLeader, onReplace }:{
         </Card>
       ) : (
         <div className="grid gap-3">
-          {dayPlan.exercises.map((it: any, i: number) => (
+          {dayPlan.exercises.map((it, i) => (
             <ExerciseCard
               key={i + it.exerciseId}
               item={it}
