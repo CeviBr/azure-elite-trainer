@@ -18,8 +18,6 @@ export default function LeaderEditor({ plan, onSave, leaderName }:{
   const day = draft.find((d) => d.day === activeDay)!;
 
   const updateDay = (mut: (d: DayWorkout) => void) => {
-    const next = draft.map((d) => d.day === activeDay ? (mut({...d, exercises:[...d.exercises]}) as any) ?? null : d);
-    // simpler: rebuild
     const rebuilt = draft.map((d) => {
       if (d.day !== activeDay) return d;
       const copy: DayWorkout = { ...d, exercises: d.exercises.map((e)=>({...e})) };
@@ -27,7 +25,6 @@ export default function LeaderEditor({ plan, onSave, leaderName }:{
       return copy;
     });
     setDraft(rebuilt);
-    void next;
   };
 
   const addExercise = () => updateDay((d) => {
