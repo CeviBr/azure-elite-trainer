@@ -1,5 +1,9 @@
 export type UserId = "fabio" | "william" | "fabricio";
 
+import avatarFabio from "@/assets/avatar-fabio.jpg";
+import avatarWilliam from "@/assets/avatar-william.jpg";
+import avatarFabricio from "@/assets/avatar-fabricio.jpg";
+
 export interface AppUser {
   id: UserId;
   name: string;
@@ -7,12 +11,13 @@ export interface AppUser {
   role: "leader" | "member";
   color: string;
   initials: string;
+  avatar: string;
 }
 
 export const USERS: AppUser[] = [
-  { id: "fabio",    name: "Fábio",    password: "senha123", role: "member", color: "from-blue-600 to-blue-900", initials: "FB" },
-  { id: "william",  name: "William",  password: "senha456", role: "member", color: "from-sky-600 to-indigo-900", initials: "WL" },
-  { id: "fabricio", name: "Fabrício", password: "senha789", role: "leader", color: "from-amber-500 via-yellow-400 to-amber-700", initials: "FC" },
+  { id: "fabio",    name: "Fábio",    password: "senha123", role: "member", color: "from-zinc-700 to-zinc-900",  initials: "FB", avatar: avatarFabio },
+  { id: "william",  name: "William",  password: "senha456", role: "member", color: "from-zinc-700 to-zinc-900",  initials: "WL", avatar: avatarWilliam },
+  { id: "fabricio", name: "Fabrício", password: "senha789", role: "leader", color: "from-zinc-800 to-black",      initials: "FC", avatar: avatarFabricio },
 ];
 
 export const SESSION_KEY = "ironforge_session";
