@@ -32,6 +32,7 @@ export function login(name: string, password: string): AppUser | null {
   );
   if (user) {
     localStorage.setItem(SESSION_KEY, user.id);
+    recordEntry(user.id);
     return user;
   }
   return null;
@@ -39,4 +40,34 @@ export function login(name: string, password: string): AppUser | null {
 
 export function logout() {
   localStorage.removeItem(SESSION_KEY);
+}
+
+/* ---------- Registro de Entradas ---------- */
+const ENTRIES_KEY = "ganst3r_entries_v1";
+
+export interface EntryLog {
+  total: number;                       // contador global Nº 000
+  byUser: Record<UserId, number[]>;    // timestamps por usuário
+  firstSeen: Record<UserId, number>;   // primeiro acesso (para "dias")
+}
+
+export function loadEntries(): EntryLog {
+  try {
+    const raw = localStorage.getItem(ENTRIES_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { total: 0, byUser: { fabio: [], william: [], fabricio: [] }, firstSeen: {} as any };
+}
+
+export function recordEntry(id: UserId) {
+  const e = loadEntries();
+  e.total += 1;
+  e.byUser[id] = [...(e.byUser[id] ?? []), Date.now()];
+  if (!e.firstSeen[id]) e.firstSeen[id] = Date.now();
+  localStorage.setItem(ENTRIES_KEY, JSON.stringify(e));
+}
+
+export function daysSince(ts?: number) {
+  if (!ts) return 0;
+  return Math.max(0, Math.floor((Date.now() - ts) / 86_400_000));
 }
