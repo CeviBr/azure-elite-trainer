@@ -3,10 +3,19 @@ import { USERS, login, type AppUser, type UserId, loadEntries, daysSince } from 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Lock, Eye, EyeOff, ArrowRight, Crown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Lock, Eye, EyeOff, ArrowRight, Crown } from "lucide-react";
 import { toast } from "sonner";
 import sketchHero from "@/assets/sketch-hero.png";
 import sketchMountain from "@/assets/sketch-mountain.png";
+import gangFearNoEvil from "@/assets/gang-fearnoevil.jpg";
+import gangCollage from "@/assets/gang-collage.jpg";
+import gangMoney from "@/assets/gang-money.jpg";
+import gangKing from "@/assets/gang-king.jpg";
+import gangHood from "@/assets/gang-hood.jpg";
+import gangPistola from "@/assets/gang-pistola.jpg";
+import gangSoldier from "@/assets/gang-soldier.jpg";
+import gangCrown from "@/assets/gang-crown.jpg";
+import gangMonk from "@/assets/gang-monk.jpg";
 
 const PHRASES = [
   ["DISCIPLINA HOJE.", "FORÇA AMANHÃ.", "CONQUISTA SEMPRE."],
@@ -47,6 +56,24 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
 
   const phrase = PHRASES[phraseIdx];
   const ordered = [...USERS].sort((a, b) => (a.role === "leader" ? -1 : 1));
+
+  // Membros premium — só 3 reais têm acesso. Os demais são "candidatos" visuais.
+  type Member = {
+    id: string; name: string; image: string; tag: string;
+    rank: string; status: "ACTIVE" | "LOCKED" | "PENDING";
+    realId?: UserId;
+  };
+  const realLeader = USERS.find((u) => u.role === "leader")!;
+  const realFabio = USERS.find((u) => u.id === "fabio")!;
+  const realWilliam = USERS.find((u) => u.id === "william")!;
+  const members: Member[] = [
+    { id: realLeader.id, name: realLeader.name.toUpperCase(), image: gangCrown, tag: "EL JEFE", rank: "01", status: "ACTIVE", realId: realLeader.id },
+    { id: realFabio.id, name: realFabio.name.toUpperCase(), image: gangSoldier, tag: "SOLDADO", rank: "02", status: "ACTIVE", realId: realFabio.id },
+    { id: realWilliam.id, name: realWilliam.name.toUpperCase(), image: gangHood, tag: "CAPOREGIME", rank: "03", status: "ACTIVE", realId: realWilliam.id },
+    { id: "kane", name: "KANE", image: gangKing, tag: "ENFORCER", rank: "04", status: "LOCKED" },
+    { id: "vito", name: "VITO", image: gangFearNoEvil, tag: "CONSIGLIERE", rank: "05", status: "PENDING" },
+    { id: "raven", name: "RAVEN", image: gangMonk, tag: "SHADOW", rank: "06", status: "LOCKED" },
+  ];
 
   return (
     <div className="min-h-screen w-full bg-[#e9e6df] text-zinc-900 font-mono"
@@ -123,48 +150,85 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
             </div>
           </div>
 
-          {/* MEMBROS SECTION */}
-          <div className="border-b-2 border-zinc-900 pb-8 mb-6">
-            <div className="flex items-end justify-between mb-6">
-              <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight">MEMBROS</h3>
-              <div className="text-[11px] uppercase tracking-[0.25em] text-zinc-700 hidden sm:block">
-                SOMOS DISCIPLINA.<br />SOMOS FOCO.<br />SOMOS GANGST3R.
-              </div>
-              <button className="text-[10px] uppercase tracking-[0.3em] border border-zinc-900 px-3 py-1.5">FILTRAR</button>
-            </div>
-
-            <div className="relative">
-              <button className="hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 text-zinc-700"><ChevronLeft className="h-6 w-6" /></button>
-              <button className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 text-zinc-700"><ChevronRight className="h-6 w-6" /></button>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                {ordered.map((u, idx) => (
-                  <button
-                    key={u.id}
-                    onClick={() => setProfileOpen(u.id)}
-                    onDoubleClick={() => setSelected(u.id)}
-                    className={`group border-2 border-zinc-900 p-3 text-left bg-[#e9e6df]/40 hover:bg-zinc-900 hover:text-[#e9e6df] transition ${
-                      u.role === "leader" ? "sm:col-span-1 sm:row-span-1" : ""
-                    }`}
-                  >
-                    <div className="aspect-[3/4] overflow-hidden mb-2 border border-zinc-900/30">
-                      <img src={u.avatar} alt={u.name} className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition" />
-                    </div>
-                    <div className="flex items-baseline justify-between">
-                      <p className="text-xs font-black uppercase tracking-wider">{u.name}</p>
-                      {u.role === "leader" && <Crown className="h-3 w-3" />}
-                    </div>
-                    <div className="mt-1 text-[9px] uppercase tracking-[0.2em] space-y-0.5 opacity-80">
-                      <p>TREINOS<br /><span className="font-bold">{(entries.byUser[u.id]?.length ?? 0) + 240 + idx * 27}</span></p>
-                      <p>NÍVEL <span className="font-bold">{u.role === "leader" ? "ELITE" : "AVANÇADO"}</span></p>
-                    </div>
-                  </button>
-                ))}
+          {/* LA FAMIGLIA — premium gangster roster */}
+          <div className="relative -mx-4 sm:-mx-8 mb-6 bg-black text-zinc-100 border-y-2 border-zinc-900">
+            {/* film grain overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.18] mix-blend-overlay"
+              style={{ backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")` }} />
+            <div className="relative px-4 sm:px-8 py-8">
+              <div className="flex items-end justify-between mb-6 border-b border-amber-500/30 pb-4">
+                <div>
+                  <p className="text-[10px] tracking-[0.4em] text-amber-400/80 mb-1">— LA FAMIGLIA —</p>
+                  <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">
+                    A <span className="italic font-serif text-amber-400">família</span> não negocia.
+                  </h3>
+                </div>
+                <div className="text-right text-[10px] tracking-[0.3em] text-zinc-400 hidden sm:block">
+                  ROSTER · CONFIDENCIAL<br />
+                  <span className="text-amber-400">03 ATIVOS</span> · 03 EM ESPERA
+                </div>
               </div>
 
-              <div className="flex justify-center gap-1.5 mt-5">
-                <span className="h-1.5 w-1.5 bg-zinc-900" /><span className="h-1.5 w-1.5 border border-zinc-900" /><span className="h-1.5 w-1.5 border border-zinc-900" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
+                {members.map((m) => {
+                  const active = m.status === "ACTIVE";
+                  const realCount = m.realId ? (entries.byUser[m.realId]?.length ?? 0) : 0;
+                  return (
+                    <button
+                      key={m.id}
+                      disabled={!active}
+                      onClick={() => m.realId && setProfileOpen(m.realId)}
+                      onDoubleClick={() => m.realId && setSelected(m.realId)}
+                      className={`group relative overflow-hidden border ${active ? "border-amber-500/50 hover:border-amber-400" : "border-zinc-700/60"} bg-zinc-950 transition-all ${active ? "hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(245,158,11,0.4)]" : "opacity-60 cursor-not-allowed"}`}
+                    >
+                      <div className="relative aspect-[3/4] overflow-hidden">
+                        <img src={m.image} alt={m.name} className={`w-full h-full object-cover transition duration-700 ${active ? "grayscale group-hover:grayscale-0 group-hover:scale-105" : "grayscale blur-[2px]"}`} />
+                        {/* gradient bottom */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                        {/* corner gold accents */}
+                        <span className="absolute top-2 left-2 h-3 w-3 border-t border-l border-amber-400" />
+                        <span className="absolute top-2 right-2 h-3 w-3 border-t border-r border-amber-400" />
+                        <span className="absolute bottom-2 left-2 h-3 w-3 border-b border-l border-amber-400" />
+                        <span className="absolute bottom-2 right-2 h-3 w-3 border-b border-r border-amber-400" />
+                        {/* rank */}
+                        <div className="absolute top-2 left-1/2 -translate-x-1/2 text-[9px] tracking-[0.4em] text-amber-400/90 font-bold">
+                          № {m.rank}
+                        </div>
+                        {/* status badge */}
+                        <div className="absolute top-3 right-3 z-10">
+                          {active ? (
+                            <span className="text-[8px] tracking-[0.3em] bg-amber-400 text-black px-1.5 py-0.5 font-bold">ATIVO</span>
+                          ) : m.status === "PENDING" ? (
+                            <span className="text-[8px] tracking-[0.3em] bg-zinc-100 text-black px-1.5 py-0.5 font-bold">ESPERA</span>
+                          ) : (
+                            <span className="text-[8px] tracking-[0.3em] border border-red-500/70 text-red-400 px-1.5 py-0.5 font-bold flex items-center gap-1">
+                              <Lock className="h-2.5 w-2.5" /> NEGADO
+                            </span>
+                          )}
+                        </div>
+                        {/* name block */}
+                        <div className="absolute bottom-0 inset-x-0 p-3">
+                          <p className="text-[9px] tracking-[0.3em] text-amber-400/80">{m.tag}</p>
+                          <p className="text-lg font-black uppercase tracking-wider flex items-center gap-1.5 leading-tight">
+                            {m.name}
+                            {m.id === realLeader.id && <Crown className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />}
+                          </p>
+                          {active && (
+                            <div className="mt-2 flex items-center justify-between text-[9px] tracking-[0.2em] text-zinc-300 border-t border-amber-400/20 pt-1.5">
+                              <span>CHECK-INS <span className="text-amber-400 font-bold">{realCount + 47}</span></span>
+                              <span className="text-amber-400">→</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
+
+              <p className="mt-6 text-center text-[10px] tracking-[0.4em] text-zinc-500">
+                — RESPECT IS EARNED · NOT GIVEN —
+              </p>
             </div>
           </div>
 
