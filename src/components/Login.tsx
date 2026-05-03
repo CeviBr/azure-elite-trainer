@@ -57,6 +57,24 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
   const phrase = PHRASES[phraseIdx];
   const ordered = [...USERS].sort((a, b) => (a.role === "leader" ? -1 : 1));
 
+  // Membros premium — só 3 reais têm acesso. Os demais são "candidatos" visuais.
+  type Member = {
+    id: string; name: string; image: string; tag: string;
+    rank: string; status: "ACTIVE" | "LOCKED" | "PENDING";
+    realId?: UserId;
+  };
+  const realLeader = USERS.find((u) => u.role === "leader")!;
+  const realFabio = USERS.find((u) => u.id === "fabio")!;
+  const realWilliam = USERS.find((u) => u.id === "william")!;
+  const members: Member[] = [
+    { id: realLeader.id, name: realLeader.name.toUpperCase(), image: gangCrown, tag: "EL JEFE", rank: "01", status: "ACTIVE", realId: realLeader.id },
+    { id: realFabio.id, name: realFabio.name.toUpperCase(), image: gangSoldier, tag: "SOLDADO", rank: "02", status: "ACTIVE", realId: realFabio.id },
+    { id: realWilliam.id, name: realWilliam.name.toUpperCase(), image: gangHood, tag: "CAPOREGIME", rank: "03", status: "ACTIVE", realId: realWilliam.id },
+    { id: "kane", name: "KANE", image: gangKing, tag: "ENFORCER", rank: "04", status: "LOCKED" },
+    { id: "vito", name: "VITO", image: gangFearNoEvil, tag: "CONSIGLIERE", rank: "05", status: "PENDING" },
+    { id: "raven", name: "RAVEN", image: gangMonk, tag: "SHADOW", rank: "06", status: "LOCKED" },
+  ];
+
   return (
     <div className="min-h-screen w-full bg-[#e9e6df] text-zinc-900 font-mono"
       style={{
