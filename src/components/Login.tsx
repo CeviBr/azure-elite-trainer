@@ -7,6 +7,15 @@ import { Lock, Eye, EyeOff, ArrowRight, Crown, ChevronLeft, ChevronRight } from 
 import { toast } from "sonner";
 import sketchHero from "@/assets/sketch-hero.png";
 import sketchMountain from "@/assets/sketch-mountain.png";
+import gangFearNoEvil from "@/assets/gang-fearnoevil.jpg";
+import gangCollage from "@/assets/gang-collage.jpg";
+import gangMoney from "@/assets/gang-money.jpg";
+import gangKing from "@/assets/gang-king.jpg";
+import gangHood from "@/assets/gang-hood.jpg";
+import gangPistola from "@/assets/gang-pistola.jpg";
+import gangSoldier from "@/assets/gang-soldier.jpg";
+import gangCrown from "@/assets/gang-crown.jpg";
+import gangMonk from "@/assets/gang-monk.jpg";
 
 const PHRASES = [
   ["DISCIPLINA HOJE.", "FORÇA AMANHÃ.", "CONQUISTA SEMPRE."],
