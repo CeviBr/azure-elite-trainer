@@ -3,7 +3,7 @@ import { USERS, login, type AppUser, type UserId, loadEntries, daysSince } from 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Lock, Eye, EyeOff, ArrowRight, Crown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Lock, Eye, EyeOff, ArrowRight, Crown } from "lucide-react";
 import { toast } from "sonner";
 import sketchHero from "@/assets/sketch-hero.png";
 import sketchMountain from "@/assets/sketch-mountain.png";
