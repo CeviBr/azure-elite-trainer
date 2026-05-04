@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { USERS, login, type AppUser, type UserId, loadEntries, daysSince, streakDays, getSession } from "@/lib/users";
+import { USERS, login, type AppUser, type UserId, loadEntries, daysSince, streakDays, getSession, findByNickname, getLastNickname, setLastNickname } from "@/lib/users";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Lock, Eye, EyeOff, ArrowRight, Crown, ChevronLeft, ChevronRight, Dumbbell, Skull, Flame } from "lucide-react";
@@ -9,11 +9,6 @@ import mLeader from "@/assets/m-leader.png";
 import mShadow from "@/assets/m-shadow.png";
 import mRazor from "@/assets/m-razor.png";
 import mGhost from "@/assets/m-ghost.png";
-import mVenom from "@/assets/m-venom.png";
-import mIce from "@/assets/m-ice.png";
-import mBrutal from "@/assets/m-brutal.png";
-import mKilla from "@/assets/m-killa.png";
-import mMaligno from "@/assets/m-maligno.png";
 import footerBack from "@/assets/footer-back.png";
 
 const PHRASES = [
@@ -36,7 +31,12 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [phraseIdx, setPhraseIdx] = useState(0);
-  const [name, setName] = useState(session?.name ?? "");
+  const lastNick = getLastNickname();
+  const initialNick = session?.nickname ?? lastNick ?? "";
+  const [nickInput, setNickInput] = useState(initialNick);
+  const [recognized, setRecognized] = useState<AppUser | null>(
+    initialNick ? findByNickname(initialNick) ?? null : null
+  );
   const entries = useMemo(loadEntries, [profileOpen]);
 
   useEffect(() => {
@@ -44,17 +44,28 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
     return () => clearInterval(t);
   }, []);
 
-  const greetName = (session?.name ?? name ?? "ATLETA").toUpperCase();
+  const greetName = (recognized?.name ?? "ATLETA").toUpperCase();
   const entryNumber = String(entries.total).padStart(3, "0");
   const nextEntry = String(entries.total + 1).padStart(3, "0");
 
+  const confirmNick = () => {
+    const u = findByNickname(nickInput);
+    if (u) {
+      setRecognized(u);
+      setLastNickname(u.nickname);
+    } else {
+      toast.error("Nickname não reconhecido");
+    }
+  };
+
   const submit = () => {
-    const u = login(name || session?.name || "", password);
+    if (!recognized) { confirmNick(); return; }
+    const u = login(recognized.nickname, password);
     if (u) {
       toast.success(`Check-in Nº ${nextEntry} — ${u.name}`);
       onLogin(u);
     } else {
-      toast.error("Nome ou senha incorretos");
+      toast.error("Senha incorreta");
       setPassword("");
     }
   };
@@ -66,15 +77,9 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
   const phrase = PHRASES[phraseIdx];
 
   const members: Member[] = [
-    { id: realLeader.id, realId: realLeader.id, name: "LÍDER", image: mLeader, level: "ELITE", treinos: 342 + (entries.byUser[realLeader.id]?.length ?? 0), seguidores: "1.234", streak: streakDays(entries.byUser[realLeader.id]), lastDays: daysSince(entries.byUser[realLeader.id]?.slice(-1)[0]), isLeader: true, bio: "Comanda a operação. Disciplina cirúrgica." },
-    { id: realFabio.id, realId: realFabio.id, name: "SHADOW", image: mShadow, level: "AVANÇADO", treinos: 248 + (entries.byUser[realFabio.id]?.length ?? 0), seguidores: "987", streak: streakDays(entries.byUser[realFabio.id]), lastDays: daysSince(entries.byUser[realFabio.id]?.slice(-1)[0]), bio: "Silencioso. Letal. Sem desculpas." },
-    { id: realWilliam.id, realId: realWilliam.id, name: "RAZOR", image: mRazor, level: "AVANÇADO", treinos: 267 + (entries.byUser[realWilliam.id]?.length ?? 0), seguidores: "856", streak: streakDays(entries.byUser[realWilliam.id]), lastDays: daysSince(entries.byUser[realWilliam.id]?.slice(-1)[0]), bio: "Corte preciso em cada repetição." },
-    { id: "ghost", name: "GHOST", image: mGhost, level: "ELITE", treinos: 310, seguidores: "1.102", streak: 18, lastDays: 0, locked: true, bio: "Aparece. Treina. Some." },
-    { id: "venom", name: "VENOM", image: mVenom, level: "AVANÇADO", treinos: 275, seguidores: "889", streak: 9, lastDays: 1, locked: true, bio: "Veneno doce na hora certa." },
-    { id: "ice", name: "ICE", image: mIce, level: "INTERMEDIÁRIO", treinos: 248, seguidores: "765", streak: 5, lastDays: 2, locked: true, bio: "Frio. Calculista. Constante." },
-    { id: "brutal", name: "BRUTAL", image: mBrutal, level: "ELITE", treinos: 320, seguidores: "1.340", streak: 22, lastDays: 0, locked: true, bio: "Força bruta com método." },
-    { id: "killa", name: "KILLA", image: mKilla, level: "AVANÇADO", treinos: 290, seguidores: "934", streak: 14, lastDays: 1, locked: true, bio: "Mata o cansaço antes que mate você." },
-    { id: "maligno", name: "MALIGNO", image: mMaligno, level: "ELITE", treinos: 305, seguidores: "1.015", streak: 11, lastDays: 0, locked: true, bio: "Ataca onde dói: a zona de conforto." },
+    { id: realLeader.id, realId: realLeader.id, name: realLeader.nickname.toUpperCase(), image: mLeader, level: "ELITE", treinos: 342 + (entries.byUser[realLeader.id]?.length ?? 0), seguidores: "1.234", streak: streakDays(entries.byUser[realLeader.id]), lastDays: daysSince(entries.byUser[realLeader.id]?.slice(-1)[0]), isLeader: true, bio: "Líder temporário. Comanda a operação com disciplina cirúrgica." },
+    { id: realFabio.id, realId: realFabio.id, name: realFabio.nickname.toUpperCase(), image: mShadow, level: "AVANÇADO", treinos: 248 + (entries.byUser[realFabio.id]?.length ?? 0), seguidores: "987", streak: streakDays(entries.byUser[realFabio.id]), lastDays: daysSince(entries.byUser[realFabio.id]?.slice(-1)[0]), bio: "Silencioso. Letal. Sem desculpas." },
+    { id: realWilliam.id, realId: realWilliam.id, name: realWilliam.nickname.toUpperCase(), image: mRazor, level: "AVANÇADO", treinos: 267 + (entries.byUser[realWilliam.id]?.length ?? 0), seguidores: "856", streak: streakDays(entries.byUser[realWilliam.id]), lastDays: daysSince(entries.byUser[realWilliam.id]?.slice(-1)[0]), bio: "Tiro certeiro. Cada repetição é uma marca." },
   ];
 
   const profile = members.find((m) => m.id === profileOpen);
@@ -119,32 +124,44 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
               </div>
 
               <div className="space-y-3 max-w-xs">
-                {!session && (
+                {!recognized ? (
                   <Input
-                    placeholder="NOME"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    placeholder="NICKNAME"
+                    value={nickInput}
+                    onChange={(e) => setNickInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && confirmNick()}
                     className="h-11 rounded-none bg-zinc-900/60 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 tracking-[0.3em] uppercase text-xs focus-visible:ring-0 focus-visible:border-zinc-400"
                   />
+                ) : (
+                  <div className="flex items-center justify-between border border-zinc-700 bg-zinc-900/60 px-3 h-11">
+                    <div>
+                      <p className="text-[9px] tracking-[0.3em] text-zinc-500">NICKNAME</p>
+                      <p className="text-xs tracking-[0.25em] text-zinc-100 font-bold uppercase">{recognized.nickname}</p>
+                    </div>
+                    <button onClick={() => { setRecognized(null); setPassword(""); }} className="text-[9px] tracking-[0.25em] text-zinc-400 hover:text-white">TROCAR</button>
+                  </div>
                 )}
-                <div className="relative">
-                  <Input
-                    type={showPass ? "text" : "password"}
-                    placeholder="SENHA"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && submit()}
-                    className="h-11 rounded-none bg-zinc-900/60 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 tracking-[0.3em] uppercase text-xs focus-visible:ring-0 focus-visible:border-zinc-400"
-                  />
-                  <button type="button" onClick={() => setShowPass((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400">
-                    {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+                {recognized && (
+                  <div className="relative">
+                    <Input
+                      type={showPass ? "text" : "password"}
+                      placeholder="SENHA"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && submit()}
+                      autoFocus
+                      className="h-11 rounded-none bg-zinc-900/60 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 tracking-[0.3em] uppercase text-xs focus-visible:ring-0 focus-visible:border-zinc-400"
+                    />
+                    <button type="button" onClick={() => setShowPass((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400">
+                      {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                )}
                 <button
                   onClick={submit}
                   className="w-full h-12 bg-zinc-200 text-black uppercase tracking-[0.3em] text-xs font-black flex items-center justify-center gap-3 hover:bg-white transition shadow-[inset_0_-3px_0_rgba(0,0,0,0.2)]"
                 >
-                  LIBERAR ACESSO <ArrowRight className="h-4 w-4" />
+                  {recognized ? "LIBERAR ACESSO" : "RECONHECER"} <ArrowRight className="h-4 w-4" />
                 </button>
                 <p className="flex items-start gap-2 text-[10px] uppercase tracking-[0.25em] text-zinc-500 leading-relaxed pt-1">
                   <Lock className="h-3 w-3 mt-0.5 shrink-0" />
@@ -215,7 +232,7 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
               <ChevronRight className="h-7 w-7" />
             </button>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 auto-rows-[230px] gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 auto-rows-[230px] gap-3 sm:gap-4">
               {members.map((m) => (
                 <MemberCard key={m.id} member={m} big={m.isLeader} onOpen={() => setProfileOpen(m.id)} />
               ))}
