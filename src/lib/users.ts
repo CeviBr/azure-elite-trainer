@@ -76,3 +76,20 @@ export function daysSince(ts?: number) {
   if (!ts) return 0;
   return Math.max(0, Math.floor((Date.now() - ts) / 86_400_000));
 }
+
+/** Calcula sequência de dias consecutivos com check-in (streak). */
+export function streakDays(timestamps?: number[]): number {
+  if (!timestamps || !timestamps.length) return 0;
+  const days = Array.from(new Set(timestamps.map((t) => {
+    const d = new Date(t); d.setHours(0,0,0,0); return d.getTime();
+  }))).sort((a,b) => b - a);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const yesterday = today.getTime() - 86_400_000;
+  if (days[0] !== today.getTime() && days[0] !== yesterday) return 0;
+  let streak = 1;
+  for (let i = 1; i < days.length; i++) {
+    if (days[i-1] - days[i] === 86_400_000) streak++;
+    else break;
+  }
+  return streak;
+}
