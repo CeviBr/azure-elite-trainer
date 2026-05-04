@@ -7,6 +7,7 @@ import avatarFabricio from "@/assets/avatar-fabricio.jpg";
 export interface AppUser {
   id: UserId;
   name: string;
+  nickname: string;
   password: string;
   role: "leader" | "member";
   color: string;
@@ -15,12 +16,25 @@ export interface AppUser {
 }
 
 export const USERS: AppUser[] = [
-  { id: "fabio",    name: "Fábio",    password: "senha123", role: "member", color: "from-zinc-700 to-zinc-900",  initials: "FB", avatar: avatarFabio },
-  { id: "william",  name: "William",  password: "senha456", role: "member", color: "from-zinc-700 to-zinc-900",  initials: "WL", avatar: avatarWilliam },
-  { id: "fabricio", name: "Fabrício", password: "senha789", role: "leader", color: "from-zinc-800 to-black",      initials: "FC", avatar: avatarFabricio },
+  { id: "fabio",    name: "Fábio",    nickname: "ElFabro",  password: "senha123", role: "member", color: "from-zinc-700 to-zinc-900", initials: "FB", avatar: avatarFabio },
+  { id: "william",  name: "William",  nickname: "HeadShot", password: "senha456", role: "member", color: "from-zinc-700 to-zinc-900", initials: "WL", avatar: avatarWilliam },
+  { id: "fabricio", name: "Fabrício", nickname: "ReisZo",   password: "senha789", role: "leader", color: "from-zinc-800 to-black",     initials: "FC", avatar: avatarFabricio },
 ];
 
 export const SESSION_KEY = "ironforge_session";
+export const LAST_NICK_KEY = "ganst3r_last_nick";
+
+export function findByNickname(nick: string): AppUser | undefined {
+  const n = nick.trim().toLowerCase();
+  return USERS.find((u) => u.nickname.toLowerCase() === n);
+}
+
+export function getLastNickname(): string | null {
+  try { return localStorage.getItem(LAST_NICK_KEY); } catch { return null; }
+}
+export function setLastNickname(nick: string) {
+  try { localStorage.setItem(LAST_NICK_KEY, nick); } catch {}
+}
 
 export function getSession(): AppUser | null {
   try {
@@ -31,12 +45,14 @@ export function getSession(): AppUser | null {
   }
 }
 
-export function login(name: string, password: string): AppUser | null {
+export function login(nickOrName: string, password: string): AppUser | null {
+  const key = nickOrName.trim().toLowerCase();
   const user = USERS.find(
-    (u) => u.name.toLowerCase() === name.toLowerCase() && u.password === password
+    (u) => (u.nickname.toLowerCase() === key || u.name.toLowerCase() === key) && u.password === password
   );
   if (user) {
     localStorage.setItem(SESSION_KEY, user.id);
+    localStorage.setItem(LAST_NICK_KEY, user.nickname);
     recordEntry(user.id);
     return user;
   }
