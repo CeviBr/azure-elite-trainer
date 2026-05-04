@@ -9,7 +9,7 @@ import LeaderEditor from "@/components/LeaderEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Crown, LogOut, Dumbbell, CalendarDays, Settings2, BellRing } from "lucide-react";
+import { Crown, LogOut, Dumbbell, CalendarDays, Settings2, BellRing, Skull } from "lucide-react";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -64,60 +64,71 @@ const Index = () => {
   const handleLogout = () => { logout(); setUser(null); };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className="min-h-screen bg-[#0a0a0a] text-zinc-100"
+      style={{
+        fontFamily: "'Archivo','Inter',system-ui,sans-serif",
+        backgroundImage: `radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05), transparent 60%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")`,
+      }}
+    >
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Anton&family=Archivo:wght@400;700;900&family=Special+Elite&display=swap" rel="stylesheet" />
+
       {/* Header */}
-      <header className="bg-gradient-hero text-white shadow-royal">
-        <div className="container py-5 flex items-center justify-between gap-3">
+      <header className="border-b border-zinc-800 bg-black/80 backdrop-blur">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold">
-              <Crown className="h-5 w-5 text-gold-foreground" />
+            <div className="h-11 w-11 border border-zinc-700 bg-zinc-950 flex items-center justify-center">
+              <Skull className="h-5 w-5 text-zinc-200" />
             </div>
             <div>
-              <h1 className="text-2xl font-black leading-none">Iron<span className="text-gradient-gold">Forge</span></h1>
-              <p className="text-xs text-blue-100/80 mt-0.5">
+              <h1 style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-2xl text-white leading-none tracking-wide">GANGST3R</h1>
+              <p className="text-[10px] tracking-[0.3em] text-zinc-500 mt-1 uppercase">
                 {WEEK_DAYS[todayDow]} · {now.toLocaleDateString("pt-BR")}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex flex-col items-end">
-              <span className="text-xs text-blue-100/70">Logado como</span>
-              <span className="font-bold flex items-center gap-1">
-                {user.name}
-                {isLeader && <Crown className="h-3 w-3 text-gold" />}
+              <span className="text-[9px] tracking-[0.3em] text-zinc-500 uppercase">Acesso</span>
+              <span className="text-sm font-bold flex items-center gap-1 tracking-[0.2em] uppercase">
+                {user.nickname}
+                {isLeader && <Crown className="h-3 w-3 text-zinc-200" />}
               </span>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white hover:bg-white/10">
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-zinc-300 hover:bg-zinc-900 hover:text-white rounded-none border border-zinc-800">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container py-6 space-y-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Banner de hoje */}
-        <Card className="bg-gradient-royal text-white border-0 shadow-royal p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 h-40 w-40 bg-gold/20 rounded-full blur-3xl" />
+        <Card className="relative overflow-hidden rounded-none border border-zinc-800 bg-gradient-to-b from-zinc-950 to-black text-zinc-100 p-6">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] select-none">
+            <span style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-[10rem] font-black tracking-tighter text-white">TREINO</span>
+          </div>
           <div className="relative flex items-start justify-between flex-wrap gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Treino de Hoje · {WEEK_DAYS[todayDow]}</p>
-              <h2 className="text-3xl font-black mt-1">{todayPlan?.title ?? "Sem treino"}</h2>
-              <p className="text-blue-100/90 mt-1">{todayPlan?.focus}</p>
-              <div className="flex gap-4 mt-3 text-sm text-blue-100/80">
-                <span className="flex items-center gap-1"><Dumbbell className="h-4 w-4 text-gold" /> {todayPlan?.exercises.length ?? 0} exercícios</span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400">Treino de Hoje · {WEEK_DAYS[todayDow]}</p>
+              <h2 style={{ fontFamily: "'Anton', Impact, sans-serif" }} className="text-4xl uppercase mt-2 tracking-wide text-white">{todayPlan?.title ?? "Sem treino"}</h2>
+              <p className="text-zinc-400 mt-1 tracking-wider uppercase text-xs">{todayPlan?.focus}</p>
+              <div className="flex gap-4 mt-3 text-xs text-zinc-400 uppercase tracking-[0.2em]">
+                <span className="flex items-center gap-2"><Dumbbell className="h-4 w-4 text-zinc-200" /> {todayPlan?.exercises.length ?? 0} exercícios</span>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xs uppercase tracking-wider text-blue-100/70">Líder atual</p>
-              <p className="text-xl font-bold flex items-center gap-1 justify-end text-gold">
-                <Crown className="h-4 w-4" /> Fabrício
+              <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500">Líder atual</p>
+              <p style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-2xl flex items-center gap-2 justify-end text-white mt-1">
+                <Crown className="h-5 w-5" /> ReisZo
               </p>
             </div>
           </div>
         </Card>
 
         <Tabs defaultValue="today" className="w-full">
-          <TabsList className="grid grid-cols-3 sm:w-auto sm:inline-grid sm:grid-flow-col">
+          <TabsList className="grid grid-cols-3 sm:w-auto sm:inline-grid sm:grid-flow-col bg-zinc-950 border border-zinc-800 rounded-none p-0 h-auto">
             <TabsTrigger value="today"><Dumbbell className="h-4 w-4 mr-1" />Treino</TabsTrigger>
             <TabsTrigger value="calendar"><CalendarDays className="h-4 w-4 mr-1" />Calendário</TabsTrigger>
             {isLeader && <TabsTrigger value="leader"><Settings2 className="h-4 w-4 mr-1" />Líder</TabsTrigger>}
@@ -164,15 +175,15 @@ function DayDetail({ dayPlan, dayLabel, isLeader, onReplace }:{
     <section className="space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">{dayLabel}</p>
-          <h3 className="text-2xl font-black">{dayPlan.title} <span className="text-muted-foreground font-medium text-base">— {dayPlan.focus}</span></h3>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400">{dayLabel}</p>
+          <h3 style={{ fontFamily: "'Anton', Impact, sans-serif" }} className="text-3xl uppercase tracking-wide text-white">{dayPlan.title} <span className="text-zinc-500 font-medium text-base normal-case"> — {dayPlan.focus}</span></h3>
         </div>
       </div>
       {dayPlan.rest ? (
-        <Card className="bg-gradient-card border-0 shadow-soft p-10 text-center">
+        <Card className="rounded-none border border-zinc-800 bg-zinc-950 text-zinc-200 p-10 text-center">
           <p className="text-5xl">😴</p>
-          <p className="text-lg font-bold mt-3">Dia de descanso</p>
-          <p className="text-muted-foreground text-sm">Recuperação é parte do treino.</p>
+          <p style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-2xl mt-3 text-white">Dia de descanso</p>
+          <p className="text-zinc-500 text-xs uppercase tracking-[0.3em] mt-1">Recuperação é parte do treino.</p>
         </Card>
       ) : (
         <div className="grid gap-3">
