@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { USERS, login, type AppUser, type UserId, loadEntries, daysSince } from "@/lib/users";
+import { USERS, login, type AppUser, type UserId, loadEntries, daysSince, streakDays, getSession } from "@/lib/users";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Lock, Eye, EyeOff, ArrowRight, Crown, ChevronLeft, ChevronRight, Dumbbell, Skull, SlidersHorizontal } from "lucide-react";
+import { Lock, Eye, EyeOff, ArrowRight, Crown, ChevronLeft, ChevronRight, Dumbbell, Skull, Flame } from "lucide-react";
 import { toast } from "sonner";
-import heroHooded from "@/assets/gang-hero-hooded.jpg";
-import gangBack from "@/assets/gang-back.jpg";
-import gangCrown from "@/assets/gang-crown.jpg";
-import gangSoldier from "@/assets/gang-soldier.jpg";
-import gangHood from "@/assets/gang-hood.jpg";
-import gangKing from "@/assets/gang-king.jpg";
-import gangFearNoEvil from "@/assets/gang-fearnoevil.jpg";
-import gangMonk from "@/assets/gang-monk.jpg";
-import gangPistola from "@/assets/gang-pistola.jpg";
-import gangMoney from "@/assets/gang-money.jpg";
+
+import mLeader from "@/assets/m-leader.png";
+import mShadow from "@/assets/m-shadow.png";
+import mRazor from "@/assets/m-razor.png";
+import mGhost from "@/assets/m-ghost.png";
+import mVenom from "@/assets/m-venom.png";
+import mIce from "@/assets/m-ice.png";
+import mBrutal from "@/assets/m-brutal.png";
+import mKilla from "@/assets/m-killa.png";
+import mMaligno from "@/assets/m-maligno.png";
+import footerBack from "@/assets/footer-back.png";
 
 const PHRASES = [
   ["DISCIPLINA HOJE.", "FORÇA AMANHÃ.", "CONQUISTA SEMPRE."],
@@ -26,100 +26,107 @@ const PHRASES = [
 type Member = {
   id: string; name: string; image: string;
   level: "ELITE" | "AVANÇADO" | "INTERMEDIÁRIO";
-  treinos: number; seguidores: string;
-  isLeader?: boolean; realId?: UserId; locked?: boolean;
+  treinos: number; seguidores: string; streak: number; lastDays: number;
+  isLeader?: boolean; realId?: UserId; locked?: boolean; bio: string;
 };
 
 export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
-  const [selected, setSelected] = useState<UserId | null>(null);
-  const [profileOpen, setProfileOpen] = useState<UserId | null>(null);
+  const session = getSession();
+  const [profileOpen, setProfileOpen] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [phraseIdx, setPhraseIdx] = useState(() => Math.floor(Math.random() * PHRASES.length));
-  const entries = useMemo(loadEntries, [selected, profileOpen]);
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [name, setName] = useState(session?.name ?? "");
+  const entries = useMemo(loadEntries, [profileOpen]);
 
   useEffect(() => {
-    const t = setInterval(() => setPhraseIdx((i) => (i + 1) % PHRASES.length), 6000);
+    const t = setInterval(() => setPhraseIdx((i) => (i + 1) % PHRASES.length), 5000);
     return () => clearInterval(t);
   }, []);
+
+  const greetName = (session?.name ?? name ?? "ATLETA").toUpperCase();
+  const entryNumber = String(entries.total).padStart(3, "0");
+  const nextEntry = String(entries.total + 1).padStart(3, "0");
+
+  const submit = () => {
+    const u = login(name || session?.name || "", password);
+    if (u) {
+      toast.success(`Check-in Nº ${nextEntry} — ${u.name}`);
+      onLogin(u);
+    } else {
+      toast.error("Nome ou senha incorretos");
+      setPassword("");
+    }
+  };
 
   const realLeader = USERS.find((u) => u.role === "leader")!;
   const realFabio = USERS.find((u) => u.id === "fabio")!;
   const realWilliam = USERS.find((u) => u.id === "william")!;
 
-  const sel = selected ? USERS.find((u) => u.id === selected) : realLeader;
-  const profile = USERS.find((u) => u.id === profileOpen);
-  const entryNumber = String(entries.total).padStart(3, "0");
-  const nextEntry = String(entries.total + 1).padStart(3, "0");
-
-  const submit = () => {
-    if (!sel) return;
-    const u = login(sel.name, password);
-    if (u) {
-      toast.success(`Check-in Nº ${nextEntry} — ${u.name}`);
-      onLogin(u);
-    } else {
-      toast.error("Senha incorreta");
-      setPassword("");
-    }
-  };
-
   const phrase = PHRASES[phraseIdx];
 
   const members: Member[] = [
-    { id: realLeader.id, realId: realLeader.id, name: "LÍDER", image: gangCrown, level: "ELITE", treinos: 342, seguidores: "1.234", isLeader: true },
-    { id: realFabio.id, realId: realFabio.id, name: "SHADOW", image: gangSoldier, level: "AVANÇADO", treinos: 248, seguidores: "987" },
-    { id: realWilliam.id, realId: realWilliam.id, name: "RAZOR", image: gangHood, level: "AVANÇADO", treinos: 267, seguidores: "856" },
-    { id: "ghost", name: "GHOST", image: gangFearNoEvil, level: "ELITE", treinos: 310, seguidores: "1.102", locked: true },
-    { id: "venom", name: "VENOM", image: gangKing, level: "AVANÇADO", treinos: 275, seguidores: "889", locked: true },
-    { id: "ice", name: "ICE", image: gangMonk, level: "INTERMEDIÁRIO", treinos: 248, seguidores: "765", locked: true },
-    { id: "brutal", name: "BRUTAL", image: gangPistola, level: "ELITE", treinos: 320, seguidores: "1.340", locked: true },
-    { id: "killa", name: "KILLA", image: gangSoldier, level: "AVANÇADO", treinos: 290, seguidores: "934", locked: true },
-    { id: "maligno", name: "MALIGNO", image: gangHood, level: "ELITE", treinos: 305, seguidores: "1.015", locked: true },
+    { id: realLeader.id, realId: realLeader.id, name: "LÍDER", image: mLeader, level: "ELITE", treinos: 342 + (entries.byUser[realLeader.id]?.length ?? 0), seguidores: "1.234", streak: streakDays(entries.byUser[realLeader.id]), lastDays: daysSince(entries.byUser[realLeader.id]?.slice(-1)[0]), isLeader: true, bio: "Comanda a operação. Disciplina cirúrgica." },
+    { id: realFabio.id, realId: realFabio.id, name: "SHADOW", image: mShadow, level: "AVANÇADO", treinos: 248 + (entries.byUser[realFabio.id]?.length ?? 0), seguidores: "987", streak: streakDays(entries.byUser[realFabio.id]), lastDays: daysSince(entries.byUser[realFabio.id]?.slice(-1)[0]), bio: "Silencioso. Letal. Sem desculpas." },
+    { id: realWilliam.id, realId: realWilliam.id, name: "RAZOR", image: mRazor, level: "AVANÇADO", treinos: 267 + (entries.byUser[realWilliam.id]?.length ?? 0), seguidores: "856", streak: streakDays(entries.byUser[realWilliam.id]), lastDays: daysSince(entries.byUser[realWilliam.id]?.slice(-1)[0]), bio: "Corte preciso em cada repetição." },
+    { id: "ghost", name: "GHOST", image: mGhost, level: "ELITE", treinos: 310, seguidores: "1.102", streak: 18, lastDays: 0, locked: true, bio: "Aparece. Treina. Some." },
+    { id: "venom", name: "VENOM", image: mVenom, level: "AVANÇADO", treinos: 275, seguidores: "889", streak: 9, lastDays: 1, locked: true, bio: "Veneno doce na hora certa." },
+    { id: "ice", name: "ICE", image: mIce, level: "INTERMEDIÁRIO", treinos: 248, seguidores: "765", streak: 5, lastDays: 2, locked: true, bio: "Frio. Calculista. Constante." },
+    { id: "brutal", name: "BRUTAL", image: mBrutal, level: "ELITE", treinos: 320, seguidores: "1.340", streak: 22, lastDays: 0, locked: true, bio: "Força bruta com método." },
+    { id: "killa", name: "KILLA", image: mKilla, level: "AVANÇADO", treinos: 290, seguidores: "934", streak: 14, lastDays: 1, locked: true, bio: "Mata o cansaço antes que mate você." },
+    { id: "maligno", name: "MALIGNO", image: mMaligno, level: "ELITE", treinos: 305, seguidores: "1.015", streak: 11, lastDays: 0, locked: true, bio: "Ataca onde dói: a zona de conforto." },
   ];
+
+  const profile = members.find((m) => m.id === profileOpen);
 
   return (
     <div
-      className="min-h-screen w-full bg-[#0d0d0d] text-zinc-100 font-sans"
+      className="min-h-screen w-full bg-[#0a0a0a] text-zinc-100"
       style={{
-        backgroundImage: `radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 60%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")`,
+        fontFamily: "'Archivo', 'Inter', system-ui, sans-serif",
+        backgroundImage: `radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05), transparent 60%), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")`,
       }}
     >
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+      <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Bebas+Neue&family=Anton&family=Archivo:wght@400;700;900&family=Special+Elite&display=swap" rel="stylesheet" />
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
 
-        {/* ============ TOP BLOCK ============ */}
+        {/* ============ TOP ============ */}
         <section className="relative border border-zinc-800 bg-gradient-to-b from-zinc-950 to-black overflow-hidden">
-          {/* faded graffiti behind */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none">
-            <span style={{ fontFamily: "'Bebas Neue', Impact, sans-serif" }} className="text-[18rem] font-black tracking-tighter text-white blur-[1px]">GANGST3R</span>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] select-none">
+            <span style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-[14rem] sm:text-[20rem] font-black tracking-tighter text-white blur-[1px]">GANGST3R</span>
           </div>
 
           <div className="relative grid grid-cols-1 md:grid-cols-12 gap-6 p-5 sm:p-8 min-h-[480px]">
-            {/* LEFT — login */}
-            <div className="md:col-span-4 flex flex-col justify-between">
+            {/* LEFT */}
+            <div className="md:col-span-4 flex flex-col justify-between gap-6">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Crown className="h-3 w-3 text-zinc-300" />
-                </div>
-                <h1
-                  style={{ fontFamily: "'Permanent Marker', 'Bebas Neue', Impact, sans-serif" }}
-                  className="text-4xl sm:text-5xl font-black tracking-wide text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]"
-                >
+                <h1 style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-5xl sm:text-6xl font-black tracking-wide text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)] leading-none">
                   GANGST3R
                 </h1>
-                <p className="mt-1 text-[10px] tracking-[0.4em] text-zinc-500">№ {entryNumber} · CHECK-IN</p>
+                <p className="mt-2 text-[10px] tracking-[0.4em] text-zinc-500">№ {entryNumber} · CHECK-IN</p>
               </div>
 
-              <div className="my-6">
-                <h2 className="text-2xl sm:text-3xl font-black uppercase leading-[1.05] text-white">
-                  OLÁ, {sel?.name.toUpperCase()}.
+              <div>
+                <h2 style={{ fontFamily: "'Anton', Impact, sans-serif" }} className="text-3xl sm:text-4xl uppercase leading-[1.05] text-white tracking-wide">
+                  OLÁ, <span className="text-zinc-300">{greetName}</span>.
                 </h2>
-                <p className="mt-2 text-zinc-400 uppercase text-sm tracking-wide">
+                <p className="mt-2 text-zinc-400 uppercase text-xs sm:text-sm tracking-[0.2em]">
                   Que bom você<br />por aqui novamente.
                 </p>
               </div>
 
               <div className="space-y-3 max-w-xs">
+                {!session && (
+                  <Input
+                    placeholder="NOME"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="h-11 rounded-none bg-zinc-900/60 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 tracking-[0.3em] uppercase text-xs focus-visible:ring-0 focus-visible:border-zinc-400"
+                  />
+                )}
                 <div className="relative">
                   <Input
                     type={showPass ? "text" : "password"}
@@ -146,40 +153,41 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
               </div>
             </div>
 
-            {/* CENTER — hero */}
-            <div className="md:col-span-5 relative flex items-center justify-center">
+            {/* CENTER hero */}
+            <div className="md:col-span-5 relative flex items-center justify-center min-h-[300px]">
               <img
-                src={heroHooded}
+                src={mLeader}
                 alt="Ganst3r"
-                className="max-h-[460px] object-contain"
-                style={{ filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.8))" }}
+                className="max-h-[460px] w-full object-contain animate-[float_6s_ease-in-out_infinite]"
+                style={{ filter: "drop-shadow(0 25px 50px rgba(0,0,0,0.9))" }}
               />
             </div>
 
-            {/* RIGHT — phrase + previews */}
-            <div className="md:col-span-3 flex flex-col justify-between">
+            {/* RIGHT */}
+            <div className="md:col-span-3 flex flex-col justify-between gap-6">
               <div className="text-right">
-                {phrase.map((line, i) => (
-                  <p key={i} className="text-lg sm:text-xl font-black uppercase leading-tight text-white">{line}</p>
-                ))}
+                <div className="inline-block min-h-[100px]" key={phraseIdx}>
+                  {phrase.map((line, i) => (
+                    <p key={i} style={{ fontFamily: "'Anton', Impact, sans-serif" }}
+                       className="text-xl sm:text-2xl uppercase leading-tight text-white tracking-wide animate-[slideIn_.6s_ease-out_both]"
+                       data-i={i}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
                 <div className="mt-3 ml-auto h-px w-24 bg-zinc-600" />
               </div>
 
-              <div className="mt-6 space-y-3">
+              <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                   <div className="aspect-square overflow-hidden border border-zinc-800">
-                    <img src={heroHooded} alt="" className="w-full h-full object-cover grayscale" loading="lazy" />
+                    <img src={mShadow} alt="" className="w-full h-full object-cover grayscale hover:grayscale-0 transition" />
                   </div>
                   <div className="aspect-square overflow-hidden border border-zinc-800">
-                    <img src={heroHooded} alt="" className="w-full h-full object-cover grayscale scale-x-[-1]" loading="lazy" />
+                    <img src={mGhost} alt="" className="w-full h-full object-cover grayscale hover:grayscale-0 transition" />
                   </div>
                 </div>
-                <div className="text-right text-[10px] tracking-[0.3em] text-zinc-500">01 ──── 07</div>
-                <div className="flex justify-end gap-1.5">
-                  <span className="h-2 w-2 bg-zinc-300" />
-                  <span className="h-2 w-2 border border-zinc-600" />
-                  <span className="h-2 w-2 border border-zinc-600" />
-                </div>
+                <div className="text-right text-[10px] tracking-[0.3em] text-zinc-500">01 ──── 09</div>
               </div>
             </div>
           </div>
@@ -187,146 +195,112 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
 
         {/* ============ MEMBROS ============ */}
         <section className="relative border border-zinc-800 bg-gradient-to-b from-black to-zinc-950 p-5 sm:p-8">
-          {/* header */}
           <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-            <h3
-              style={{ fontFamily: "'Permanent Marker', 'Bebas Neue', Impact, sans-serif" }}
-              className="text-3xl sm:text-4xl font-black tracking-wide text-white"
-            >
+            <h3 style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-4xl sm:text-5xl font-black tracking-wide text-white">
               MEMBROS
             </h3>
 
             <div className="flex items-center gap-6 text-center text-zinc-400">
-              <div className="flex flex-col items-center">
-                <Dumbbell className="h-5 w-5" />
-                <span className="text-[9px] tracking-[0.25em] mt-1">TREINAMOS<br />JUNTOS</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <Skull className="h-5 w-5" />
-                <span className="text-[9px] tracking-[0.25em] mt-1">EVOLUÍMOS<br />JUNTOS</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <Crown className="h-5 w-5" />
-                <span className="text-[9px] tracking-[0.25em] mt-1">VENCEMOS<br />JUNTOS</span>
-              </div>
+              <Stat3 icon={<Dumbbell className="h-5 w-5" />} t1="TREINAMOS" t2="JUNTOS" />
+              <Stat3 icon={<Skull className="h-5 w-5" />} t1="EVOLUÍMOS" t2="JUNTOS" />
+              <Stat3 icon={<Crown className="h-5 w-5" />} t1="VENCEMOS" t2="JUNTOS" />
             </div>
-
-            <button className="text-[10px] uppercase tracking-[0.3em] text-zinc-300 border border-zinc-700 px-3 py-1.5 flex items-center gap-2 hover:border-zinc-400">
-              FILTRAR <SlidersHorizontal className="h-3 w-3" />
-            </button>
           </div>
 
-          {/* grid with chevrons */}
           <div className="relative">
-            <button className="hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 z-10">
+            <button className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 z-10">
               <ChevronLeft className="h-7 w-7" />
             </button>
-            <button className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 z-10">
+            <button className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 z-10">
               <ChevronRight className="h-7 w-7" />
             </button>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 auto-rows-[210px] gap-3 sm:gap-4">
-              {members.map((m) => {
-                const big = m.isLeader;
-                return (
-                  <MemberCard
-                    key={m.id}
-                    member={m}
-                    big={big}
-                    onOpen={() => m.realId && setProfileOpen(m.realId)}
-                    onSelect={() => m.realId && setSelected(m.realId)}
-                  />
-                );
-              })}
-            </div>
-
-            <div className="flex justify-center gap-1.5 mt-6">
-              <span className="h-1.5 w-6 bg-zinc-300" />
-              <span className="h-1.5 w-1.5 bg-zinc-700 rounded-full" />
-              <span className="h-1.5 w-1.5 bg-zinc-700 rounded-full" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 auto-rows-[230px] gap-3 sm:gap-4">
+              {members.map((m) => (
+                <MemberCard key={m.id} member={m} big={m.isLeader} onOpen={() => setProfileOpen(m.id)} />
+              ))}
             </div>
           </div>
         </section>
 
         {/* ============ MANIFESTO ============ */}
-        <section className="relative border border-zinc-800 bg-black overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-3 items-center min-h-[280px]">
-            <div className="p-6 sm:p-8 z-10">
-              <p
-                style={{ fontFamily: "'Permanent Marker', cursive" }}
-                className="text-2xl sm:text-3xl font-black uppercase leading-tight text-white"
-              >
-                TREINE EM SILÊNCIO.<br />DEIXE SEUS RESULTADOS<br />FAZEREM BARULHO.
+        <section className="relative border border-zinc-800 bg-black overflow-hidden min-h-[420px]">
+          <img src={footerBack} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-black" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/70" />
+
+          <div className="relative grid grid-cols-1 md:grid-cols-3 items-center gap-6 p-6 sm:p-10 min-h-[420px]">
+            <div>
+              <span style={{ fontFamily: "'Special Elite', monospace" }} className="text-[10px] tracking-[0.4em] text-zinc-400 block mb-3">— MANIFESTO Nº 01</span>
+              <p style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-3xl sm:text-4xl uppercase leading-[1.05] text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.9)]">
+                Treine em <span className="text-zinc-400">silêncio</span>.<br />
+                Deixe seus resultados<br />
+                <span className="bg-zinc-100 text-black px-2">fazerem barulho</span>.
               </p>
+              <div className="mt-4 h-0.5 w-16 bg-zinc-300" />
             </div>
 
-            <div className="relative h-[280px] md:h-full">
-              <img src={gangBack} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" loading="lazy" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span
-                  style={{ fontFamily: "'Permanent Marker', cursive" }}
-                  className="text-3xl sm:text-4xl font-black tracking-wider text-white/80 drop-shadow-[2px_2px_0_rgba(0,0,0,0.9)]"
-                >
-                  GANGST3R
-                </span>
-              </div>
-            </div>
-
-            <div className="p-6 sm:p-8 text-right z-10">
-              <p
-                style={{ fontFamily: "'Permanent Marker', cursive" }}
-                className="text-2xl sm:text-3xl font-black uppercase leading-tight text-white"
-              >
-                MENTE FORTE.<br />CORPO FORJADO.<br />MISSÃO CLARA.
+            <div className="text-center">
+              <p style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-6xl sm:text-7xl text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.9)]">
+                GANGST3R
               </p>
-              <div className="mt-4 flex justify-end items-center gap-2 text-zinc-500">
+              <p style={{ fontFamily: "'Special Elite', monospace" }} className="mt-3 text-[10px] tracking-[0.5em] text-zinc-400">EST · 2025 · LA FAMIGLIA</p>
+              <div className="mt-3 flex justify-center gap-3 text-zinc-500">
                 <Dumbbell className="h-4 w-4" />
+                <Crown className="h-4 w-4" />
                 <Skull className="h-4 w-4" />
-                <Dumbbell className="h-4 w-4" />
               </div>
+            </div>
+
+            <div className="text-right">
+              <span style={{ fontFamily: "'Special Elite', monospace" }} className="text-[10px] tracking-[0.4em] text-zinc-400 block mb-3">MANIFESTO Nº 02 —</span>
+              <p style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-3xl sm:text-4xl uppercase leading-[1.05] text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.9)]">
+                Mente <span className="text-zinc-400">forte</span>.<br />
+                Corpo <span className="bg-zinc-100 text-black px-2">forjado</span>.<br />
+                Missão clara.
+              </p>
+              <div className="mt-4 ml-auto h-0.5 w-16 bg-zinc-300" />
             </div>
           </div>
         </section>
       </div>
 
-      {/* google fonts */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Bebas+Neue&display=swap" rel="stylesheet" />
+      {/* keyframes */}
+      <style>{`
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        @keyframes slideIn { from{opacity:0; transform:translateX(20px)} to{opacity:1; transform:translateX(0)} }
+      `}</style>
 
-      {/* Profile modal */}
+      {/* Modal */}
       <Dialog open={!!profile} onOpenChange={(v) => !v && setProfileOpen(null)}>
-        <DialogContent className="max-w-sm rounded-none bg-zinc-950 border border-zinc-800 text-zinc-100">
-          <DialogHeader>
-            <DialogTitle className="text-[10px] uppercase tracking-[0.3em] font-black text-zinc-400">
-              FICHA — ATLETA
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-sm rounded-none bg-zinc-950 border border-zinc-800 text-zinc-100 p-0 overflow-hidden">
           {profile && (
-            <div className="space-y-5">
-              <div className="aspect-square overflow-hidden border border-zinc-800">
-                <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover grayscale contrast-125" />
+            <>
+              <div className="relative aspect-square overflow-hidden">
+                <img src={profile.image} alt={profile.name} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                {profile.isLeader && <Crown className="absolute top-3 right-3 h-6 w-6 text-zinc-100" />}
+                <div className="absolute bottom-3 left-4">
+                  <p style={{ fontFamily: "'Permanent Marker', cursive" }} className="text-4xl text-white leading-none">{profile.name}</p>
+                  <p className="text-[10px] tracking-[0.3em] text-zinc-300 uppercase mt-1">{profile.level} · {profile.locked ? "ACESSO RESTRITO" : "ATIVO"}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-black uppercase text-2xl flex items-center gap-2 text-white">
-                  {profile.name} {profile.role === "leader" && <Crown className="h-4 w-4 text-zinc-300" />}
-                </h3>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500">
-                  {profile.role === "leader" ? "LÍDER · TIME GANGST3R" : "ATLETA · TIME FABRÍCIO"}
-                </p>
+              <DialogHeader className="px-5 pt-4">
+                <DialogTitle className="text-[10px] uppercase tracking-[0.3em] font-black text-zinc-400">FICHA — ATLETA</DialogTitle>
+              </DialogHeader>
+              <div className="px-5 pb-5 space-y-4">
+                <p className="text-sm text-zinc-300 italic">"{profile.bio}"</p>
+                <div className="grid grid-cols-3 border-y border-zinc-800 divide-x divide-zinc-800 text-center">
+                  <Stat label="TREINOS" value={profile.treinos} />
+                  <Stat label="STREAK" value={`${profile.streak}D`} icon={<Flame className="h-3 w-3 text-orange-400 inline" />} />
+                  <Stat label="ÚLTIMA" value={profile.lastDays === 0 ? "HOJE" : `${profile.lastDays}D`} />
+                </div>
+                <div className="flex justify-between text-[10px] tracking-[0.25em] uppercase text-zinc-500">
+                  <span>SEGUIDORES <span className="text-white font-bold">{profile.seguidores}</span></span>
+                  <span>NÍVEL <span className="text-white font-bold">{profile.level}</span></span>
+                </div>
               </div>
-              <div className="grid grid-cols-3 border-y border-zinc-800 divide-x divide-zinc-800 text-center">
-                <Stat label="CHECK-INS" value={entries.byUser[profile.id]?.length ?? 0} />
-                <Stat label="DIAS" value={daysSince(entries.firstSeen[profile.id])} />
-                <Stat label="ÚLTIMA" value={fmtRel(entries.byUser[profile.id]?.slice(-1)[0])} />
-              </div>
-              <Button
-                onClick={() => { setProfileOpen(null); setSelected(profile.id); }}
-                className="w-full rounded-none bg-zinc-200 hover:bg-white text-black uppercase tracking-[0.3em] text-xs font-black h-11"
-              >
-                LIBERAR ACESSO →
-              </Button>
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
@@ -334,41 +308,34 @@ export default function Login({ onLogin }: { onLogin: (u: AppUser) => void }) {
   );
 }
 
-function MemberCard({ member, big, onOpen, onSelect }: { member: Member; big?: boolean; onOpen: () => void; onSelect: () => void }) {
+function MemberCard({ member, big, onOpen }: { member: Member; big?: boolean; onOpen: () => void }) {
   const locked = member.locked;
   return (
     <button
       onClick={onOpen}
-      onDoubleClick={onSelect}
-      disabled={locked}
       className={`group relative overflow-hidden border border-zinc-800 bg-zinc-950 text-left transition-all
         ${big ? "col-span-2 row-span-2" : ""}
-        ${locked ? "opacity-70 cursor-not-allowed" : "hover:border-zinc-500 hover:-translate-y-0.5 hover:shadow-[0_15px_30px_-10px_rgba(0,0,0,0.8)]"}
-      `}
+        hover:border-zinc-400 hover:-translate-y-0.5 hover:shadow-[0_15px_30px_-10px_rgba(0,0,0,0.9)]`}
     >
-      <img
-        src={member.image}
-        alt={member.name}
-        loading="lazy"
-        className={`absolute inset-0 w-full h-full object-cover grayscale contrast-110 ${locked ? "blur-[1px]" : "group-hover:scale-105"} transition duration-700`}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+      <img src={member.image} alt={member.name} loading="lazy"
+        className={`absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-105 ${locked ? "grayscale" : "grayscale group-hover:grayscale-0"}`} />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-      {/* corner accents */}
       <span className="absolute top-2 left-2 h-3 w-3 border-t border-l border-zinc-300/60" />
       <span className="absolute top-2 right-2 h-3 w-3 border-t border-r border-zinc-300/60" />
+      <span className="absolute bottom-2 left-2 h-3 w-3 border-b border-l border-zinc-300/60" />
+      <span className="absolute bottom-2 right-2 h-3 w-3 border-b border-r border-zinc-300/60" />
 
-      {/* leader crown */}
-      {member.isLeader && (
-        <Crown className="absolute top-3 right-3 h-5 w-5 text-zinc-200 fill-zinc-200/80" />
+      {member.isLeader && <Crown className="absolute top-3 right-3 h-5 w-5 text-zinc-100" />}
+      {locked && (
+        <span className="absolute top-3 left-3 z-10 text-[8px] tracking-[0.3em] border border-red-500/70 text-red-400 px-1.5 py-0.5 font-bold flex items-center gap-1 bg-black/70">
+          <Lock className="h-2.5 w-2.5" /> RESTRITO
+        </span>
       )}
 
-      {/* content bottom */}
       <div className="absolute bottom-0 inset-x-0 p-3 sm:p-4">
-        <p
-          style={{ fontFamily: "'Permanent Marker', cursive" }}
-          className={`${big ? "text-4xl" : "text-2xl"} font-black tracking-wide text-white leading-none`}
-        >
+        <p style={{ fontFamily: "'Permanent Marker', cursive" }}
+           className={`${big ? "text-5xl" : "text-2xl"} text-white leading-none drop-shadow-[2px_2px_0_rgba(0,0,0,0.9)]`}>
           {member.name}
         </p>
         <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[9px] tracking-[0.2em] text-zinc-300 uppercase">
@@ -377,8 +344,8 @@ function MemberCard({ member, big, onOpen, onSelect }: { member: Member; big?: b
             <p className="text-white font-bold text-sm">{member.treinos}</p>
           </div>
           <div>
-            <p className="text-zinc-500">SEGUIDORES</p>
-            <p className="text-white font-bold text-sm">{member.seguidores}</p>
+            <p className="text-zinc-500">STREAK</p>
+            <p className="text-white font-bold text-sm flex items-center gap-1"><Flame className="h-3 w-3 text-orange-400" />{member.streak}D</p>
           </div>
         </div>
         <div className="mt-2 flex items-center justify-between text-[9px] tracking-[0.25em] uppercase">
@@ -388,38 +355,28 @@ function MemberCard({ member, big, onOpen, onSelect }: { member: Member; big?: b
           </div>
           <Skull className="h-4 w-4 text-zinc-400" />
         </div>
-        {/* progress bar */}
         <div className="mt-2 h-0.5 w-full bg-zinc-800">
-          <div
-            className="h-full bg-zinc-300"
-            style={{ width: `${member.level === "ELITE" ? 92 : member.level === "AVANÇADO" ? 70 : 50}%` }}
-          />
+          <div className="h-full bg-zinc-300" style={{ width: `${member.level === "ELITE" ? 92 : member.level === "AVANÇADO" ? 70 : 50}%` }} />
         </div>
       </div>
-
-      {locked && (
-        <div className="absolute top-3 left-3 z-10">
-          <span className="text-[8px] tracking-[0.3em] border border-red-500/70 text-red-400 px-1.5 py-0.5 font-bold flex items-center gap-1 bg-black/60">
-            <Lock className="h-2.5 w-2.5" /> NEGADO
-          </span>
-        </div>
-      )}
     </button>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+function Stat({ label, value, icon }: { label: string; value: string | number; icon?: React.ReactNode }) {
   return (
     <div className="py-3">
-      <p className="font-black text-2xl text-white">{value}</p>
+      <p className="font-black text-2xl text-white">{icon}{value}</p>
       <p className="text-[9px] uppercase tracking-[0.25em] text-zinc-500 mt-1">{label}</p>
     </div>
   );
 }
 
-function fmtRel(ts?: number) {
-  if (!ts) return "—";
-  const d = daysSince(ts);
-  if (d === 0) return "HOJE";
-  return `${d}D`;
+function Stat3({ icon, t1, t2 }: { icon: React.ReactNode; t1: string; t2: string }) {
+  return (
+    <div className="flex flex-col items-center">
+      {icon}
+      <span className="text-[9px] tracking-[0.25em] mt-1 leading-tight">{t1}<br />{t2}</span>
+    </div>
+  );
 }
