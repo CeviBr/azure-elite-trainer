@@ -14,7 +14,143 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      box_exercises: {
+        Row: {
+          body_part: string | null
+          box_id: string
+          created_at: string
+          focus: string | null
+          id: string
+          load_kg: number
+          media: Json
+          name: string
+          notes: string | null
+          order_index: number
+          reps: string
+          rest_seconds: number
+          sets: number
+          subs: string[] | null
+          youtube_id: string | null
+        }
+        Insert: {
+          body_part?: string | null
+          box_id: string
+          created_at?: string
+          focus?: string | null
+          id?: string
+          load_kg?: number
+          media?: Json
+          name: string
+          notes?: string | null
+          order_index?: number
+          reps?: string
+          rest_seconds?: number
+          sets?: number
+          subs?: string[] | null
+          youtube_id?: string | null
+        }
+        Update: {
+          body_part?: string | null
+          box_id?: string
+          created_at?: string
+          focus?: string | null
+          id?: string
+          load_kg?: number
+          media?: Json
+          name?: string
+          notes?: string | null
+          order_index?: number
+          reps?: string
+          rest_seconds?: number
+          sets?: number
+          subs?: string[] | null
+          youtube_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "box_exercises_box_id_fkey"
+            columns: ["box_id"]
+            isOneToOne: false
+            referencedRelation: "workout_boxes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_boxes: {
+        Row: {
+          body_parts: string[] | null
+          created_at: string
+          created_by: string
+          day_of_week: number | null
+          description: string | null
+          id: string
+          name: string
+          order_index: number
+          updated_at: string
+          week_label: string | null
+        }
+        Insert: {
+          body_parts?: string[] | null
+          created_at?: string
+          created_by?: string
+          day_of_week?: number | null
+          description?: string | null
+          id?: string
+          name: string
+          order_index?: number
+          updated_at?: string
+          week_label?: string | null
+        }
+        Update: {
+          body_parts?: string[] | null
+          created_at?: string
+          created_by?: string
+          day_of_week?: number | null
+          description?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          updated_at?: string
+          week_label?: string | null
+        }
+        Relationships: []
+      }
+      workout_logs: {
+        Row: {
+          body_part: string | null
+          exercise_name: string
+          id: string
+          is_pr: boolean
+          load_kg: number
+          performed_at: string
+          reps: number
+          set_num: number
+          user_id: string
+        }
+        Insert: {
+          body_part?: string | null
+          exercise_name: string
+          id?: string
+          is_pr?: boolean
+          load_kg?: number
+          performed_at?: string
+          reps?: number
+          set_num?: number
+          user_id: string
+        }
+        Update: {
+          body_part?: string | null
+          exercise_name?: string
+          id?: string
+          is_pr?: boolean
+          load_kg?: number
+          performed_at?: string
+          reps?: number
+          set_num?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
