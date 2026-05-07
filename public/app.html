@@ -3579,9 +3579,12 @@ updateProfile=function(){
   loadRemindersUI();
 };
 
-// Auto-login (persistente entre abas/sessões)
-const savedUser=localStorage.getItem('gst3r_current_user')||sessionStorage.getItem('gst3r_user');
+// Auto-login (vem do shell React via ?u=, ou da própria sessão do app)
+const _params=new URLSearchParams(location.search);
+const _fromShell=_params.get('u');
+const savedUser=_fromShell||localStorage.getItem('gst3r_current_user')||sessionStorage.getItem('gst3r_user');
 if(savedUser&&USERS[savedUser]){
+  localStorage.setItem('gst3r_current_user',savedUser);
   currentUser=savedUser;
   document.getElementById('login-page').classList.add('hidden');
   document.getElementById('app-page').classList.remove('hidden');
