@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GANGST3R · Sistema</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Anton&family=Special+Elite&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -26,8 +26,8 @@
   --white:#f0f0f0;
   --muted:#666;
   --muted2:#888;
-  --font-title:'Bebas Neue',sans-serif;
-  --font-body:'Barlow Condensed',sans-serif;
+  --font-title:'Anton','Bebas Neue',Impact,sans-serif;
+  --font-body:'Special Elite','Barlow Condensed',serif;
   --font-mono:'JetBrains Mono',monospace;
 }
 body{background:var(--black);color:var(--white);font-family:var(--font-body);font-size:16px;min-height:100vh;overflow-x:hidden;}
@@ -475,7 +475,7 @@ canvas{width:100%!important;max-height:170px;}
   <div class="profiles">
 
     <div class="profile-card leader-card" onclick="selectProfile('fabricio')">
-      <div class="profile-avatar"><img src="/mnt/user-data/uploads/gangster_member_1_leader.png" alt="Líder" onerror="this.style.display='none';this.parentElement.textContent='⚡'"></div>
+      <div class="profile-avatar"><img src="/src-assets/m-leader.png" alt="Líder" onerror="this.style.display='none';this.parentElement.textContent='⚡'"></div>
       <div class="profile-name">FABRICIO</div>
       <div class="profile-role role-leader">⚡ LÍDER</div>
       <div class="profile-pwd-wrap" id="pwd-fabricio">
@@ -488,7 +488,7 @@ canvas{width:100%!important;max-height:170px;}
     </div>
 
     <div class="profile-card" onclick="selectProfile('fabio')">
-      <div class="profile-avatar"><img src="/mnt/user-data/uploads/gangster_member_2_shadow.png" alt="Fabio" onerror="this.style.display='none';this.parentElement.textContent='🔥'"></div>
+      <div class="profile-avatar"><img src="/src-assets/m-shadow.png" alt="Fabio" onerror="this.style.display='none';this.parentElement.textContent='🔥'"></div>
       <div class="profile-name">FABIO</div>
       <div class="profile-role role-soldier">◆ SOLDADO</div>
       <div class="profile-pwd-wrap" id="pwd-fabio">
@@ -499,7 +499,7 @@ canvas{width:100%!important;max-height:170px;}
     </div>
 
     <div class="profile-card" onclick="selectProfile('william')">
-      <div class="profile-avatar"><img src="/mnt/user-data/uploads/gangster_member_3_razor.png" alt="William" onerror="this.style.display='none';this.parentElement.textContent='💀'"></div>
+      <div class="profile-avatar"><img src="/src-assets/m-razor.png" alt="William" onerror="this.style.display='none';this.parentElement.textContent='💀'"></div>
       <div class="profile-name">WILLIAM</div>
       <div class="profile-role role-soldier">◆ SOLDADO</div>
       <div class="profile-pwd-wrap" id="pwd-william">
@@ -1225,9 +1225,9 @@ canvas{width:100%!important;max-height:170px;}
 <script>
 // ======== DATA ========
 const USERS={
-  fabricio:{name:'FABRICIO',emoji:'⚡',role:'Líder',isLeader:true,pwd:'senha789',color:'#ffd700',img:'/mnt/user-data/uploads/gangster_member_1_leader.png'},
-  fabio:{name:'FABIO',emoji:'🔥',role:'Soldado',isLeader:false,pwd:'senha123',color:'#f5f5f4',img:'/mnt/user-data/uploads/gangster_member_2_shadow.png'},
-  william:{name:'WILLIAM',emoji:'💀',role:'Soldado',isLeader:false,pwd:'senha456',color:'#ff6b6b',img:'/mnt/user-data/uploads/gangster_member_3_razor.png'}
+  fabricio:{name:'FABRICIO',emoji:'⚡',role:'Líder',isLeader:true,pwd:'senha789',color:'#ffd700',img:'/src-assets/m-leader.png'},
+  fabio:{name:'FABIO',emoji:'🔥',role:'Soldado',isLeader:false,pwd:'senha123',color:'#f5f5f4',img:'/src-assets/m-shadow.png'},
+  william:{name:'WILLIAM',emoji:'💀',role:'Soldado',isLeader:false,pwd:'senha456',color:'#ff6b6b',img:'/src-assets/m-razor.png'}
 };
 
 const BODY_PARTS={costas:'🔝',peito:'🏋️',biceps:'💪',triceps:'↘️',ombros:'🔼',perna:'🦵',cardio:'⚡',outro:'💥'};
