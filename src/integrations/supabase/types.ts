@@ -76,6 +76,117 @@ export type Database = {
           },
         ]
       }
+      calendar_entries: {
+        Row: {
+          day: string
+          id: string
+          media: Json
+          note: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          day: string
+          id?: string
+          media?: Json
+          note?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          day?: string
+          id?: string
+          media?: Json
+          note?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      exercise_media: {
+        Row: {
+          box_exercise_id: string | null
+          created_at: string
+          exercise_name: string
+          id: string
+          kind: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          box_exercise_id?: string | null
+          created_at?: string
+          exercise_name: string
+          id?: string
+          kind?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          box_exercise_id?: string | null
+          created_at?: string
+          exercise_name?: string
+          id?: string
+          kind?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      leader_notices: {
+        Row: {
+          by: string
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          read_by: string[]
+        }
+        Insert: {
+          by?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          message: string
+          read_by?: string[]
+        }
+        Update: {
+          by?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          read_by?: string[]
+        }
+        Relationships: []
+      }
+      user_substitutions: {
+        Row: {
+          box_exercise_id: string | null
+          exercise_name: string
+          id: string
+          new_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          box_exercise_id?: string | null
+          exercise_name: string
+          id?: string
+          new_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          box_exercise_id?: string | null
+          exercise_name?: string
+          id?: string
+          new_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workout_boxes: {
         Row: {
           body_parts: string[] | null
