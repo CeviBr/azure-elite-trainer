@@ -2046,6 +2046,10 @@ function buildCalendar(){
     el.onclick=()=>showCalDay(calYear,calMonth,d);
     grid.appendChild(el);
   }
+  // Default: seleciona hoje se ainda não há dia escolhido neste mês
+  if(!selectedCalDay && today.getMonth()===calMonth && today.getFullYear()===calYear){
+    showCalDay(today.getFullYear(),today.getMonth(),today.getDate());
+  }
 }
 function changeMonth(delta){
   calMonth+=delta;
@@ -2093,10 +2097,13 @@ function buildCalMediaRow(){
   row.innerHTML=list.map((m,i)=>`<${m.type==='video'?'video':'img'} class="cal-media-thumb" src="${m.data}" ${m.type==='video'?'autoplay loop muted playsinline':''} onclick="removeCalMedia(${i})" title="Clique para remover"></${m.type==='video'?'video':'img'}>`).join('');
 }
 function removeCalMedia(idx){
-  const medias=getStore('cal_medias',{});
-  if(medias[selectedCalDay])medias[selectedCalDay].splice(idx,1);
-  setStore('cal_medias',medias);
-  buildCalMediaRow();
+  showQuest('🗑','REMOVER MÍDIA','Tem certeza que quer remover esta mídia do dia?',()=>{
+    const medias=getStore('cal_medias',{});
+    if(medias[selectedCalDay])medias[selectedCalDay].splice(idx,1);
+    setStore('cal_medias',medias);
+    buildCalMediaRow();
+    showToast('✓ Mídia removida');
+  });
 }
 
 // ======== EDITOR ========
