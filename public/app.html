@@ -1866,8 +1866,13 @@ function finishWorkout(){
   showQuest('🔥','SELAR O TREINO','Registrar este treino no histórico?',()=>{
     const ud=getUserData(currentUser);
     ud.totalWorkouts=(ud.totalWorkouts||0)+1;
+    // streak: só incrementa se já não tiver treinado hoje
+    const todayKey=new Date().toDateString();
+    const lastKey=ud.lastWorkout?new Date(ud.lastWorkout).toDateString():null;
+    if(lastKey!==todayKey){
+      ud.streak=(ud.streak||0)+1;
+    }
     ud.lastWorkout=new Date().toISOString();
-    ud.streak=(ud.streak||0)+1;
     setUserData(currentUser,ud);
     const done=Object.values(seriesDone).filter(Boolean).length;
     const day=currentWorkoutDayView||new Date().getDay();
