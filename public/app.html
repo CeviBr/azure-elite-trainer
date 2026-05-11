@@ -2477,9 +2477,8 @@ function autoSuggestBodyPart(name){
 
 function pushWorkout(){
   showQuest('⚡','PUBLICAR PRA GALERA','Enviar este treino para Fabio e William? Eles podem escolher seguir ou não.',()=>{
+    // Publica APENAS o que o líder editou — não sobrepõe dias intactos com defaults
     const plans=getStore('workout_plans',{});
-    [0,1,2,3,4,5,6].forEach(d=>{ if(!plans[d])plans[d]=DEFAULT_WORKOUT_PLANS[d]; });
-    setStore('workout_plans',plans);
     setStore('published',{
       timestamp:Date.now(),
       plans,
@@ -2488,6 +2487,8 @@ function pushWorkout(){
       tip:getStore('leader_tip','')
     });
     showToast('⚡ Treino publicado para a galera!');
+    // Aviso na nuvem
+    try{Cloud.publishNotice('⚡ Fabricio atualizou o treino da semana','workout');}catch(e){}
   });
 }
 function sendTip(){
