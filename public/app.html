@@ -1455,6 +1455,9 @@ function doLogout(){
   showQuest('⚔️','SAIR','Tem certeza que quer sair?',()=>{
     currentUser=null;
     localStorage.removeItem('gst3r_current_user');
+    // Notifica o shell React (que controla a sessão real) — ele cuida do unmount
+    try{window.parent&&window.parent.postMessage('gangster:logout','*');}catch(e){}
+    // Fallback caso esteja aberto direto, sem o shell
     document.getElementById('app-page').classList.add('hidden');
     document.getElementById('login-page').classList.remove('hidden');
     document.querySelectorAll('.profile-pwd-wrap').forEach(el=>el.classList.remove('show'));
