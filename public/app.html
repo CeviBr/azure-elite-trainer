@@ -2513,6 +2513,7 @@ function sendTip(){
   document.getElementById('leader-tip-card').classList.remove('hidden');
   document.getElementById('tip-content').textContent=tip;
   showToast('📢 Mensagem publicada!');
+  try{Cloud.publishNotice(`📢 Fabricio: "${tip}"`,'tip');}catch(e){}
 }
 function toggleFollowLeader(){
   const ud=getUserData(currentUser);
