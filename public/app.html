@@ -1851,6 +1851,7 @@ function closeSubModal(){document.getElementById('sub-modal').classList.add('hid
 function swapExercise(idx,subName){
   const day=currentWorkoutDayView||new Date().getDay();
   const exercises=getWorkoutPlan(day);
+  const oldName=exercises[idx]?.name||'';
   const libEx=findInLibrary(subName);
   if(libEx){
     exercises[idx]={...exercises[idx],name:libEx.name,icon:libEx.icon,bodyPart:libEx.bodyPart,focus:libEx.focus,subs:[...libEx.subs]};
@@ -1860,6 +1861,10 @@ function swapExercise(idx,subName){
   setWorkoutPlan(day,exercises);
   buildExerciseList(day,currentWorkoutWeek);
   showToast('✓ Substituído por '+subName);
+  // Se o líder trocou, avisa a galera
+  if(USERS[currentUser]?.isLeader){
+    try{Cloud.publishNotice(`🔄 Fabricio trocou "${oldName}" por "${subName}"`,'swap');}catch(e){}
+  }
 }
 
 function finishWorkout(){
