@@ -3613,5 +3613,86 @@ if(savedUser&&USERS[savedUser]){
   initApp();
 }
 </script>
+<script type="module">
+// ============ CLOUD SYNC (Lovable Cloud / Supabase) ============
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+
+const SUPABASE_URL = 'https://nsimmblkxducllfpydja.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zaW1tYmxreGR1Y2xsZnB5ZGphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MzgwMzUsImV4cCI6MjA5MzUxNDAzNX0.vC29OLD_iKUlxJsgnhe3E3ekv81Fz-SCAuNJE_n7f84';
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+
+const Cloud = {
+  client: sb,
+  async publishNotice(message, kind='info') {
+    const by = window.currentUser || 'fabricio';
+    const { error } = await sb.from('leader_notices').insert({ message, kind, by });
+    if (error) console.warn('[cloud] notice error', error);
+  },
+  async listNotices(limit=30) {
+    const { data } = await sb.from('leader_notices').select('*').order('created_at', { ascending: false }).limit(limit);
+    return data || [];
+  },
+  async uploadExecMedia(file, exerciseName) {
+    const ext = (file.name.split('.').pop()||'bin').toLowerCase();
+    const path = `${window.currentUser||'anon'}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from('exec-media').upload(path, file, { upsert: false });
+    if (upErr) { console.warn('[cloud] upload err', upErr); return null; }
+    const { data: pub } = sb.storage.from('exec-media').getPublicUrl(path);
+    const kind = file.type.startsWith('video') ? 'video' : 'image';
+    await sb.from('exercise_media').insert({ exercise_name: exerciseName, user_id: window.currentUser||'anon', kind, url: pub.publicUrl });
+    return pub.publicUrl;
+  },
+  async listExecMedia(exerciseName) {
+    const { data } = await sb.from('exercise_media').select('*').eq('exercise_name', exerciseName).order('created_at', { ascending: false });
+    return data || [];
+  },
+  async setUserSubstitution(exerciseName, newName) {
+    const user_id = window.currentUser||'anon';
+    await sb.from('user_substitutions').upsert({ user_id, exercise_name: exerciseName, new_name: newName, updated_at: new Date().toISOString() }, { onConflict: 'user_id,exercise_name' });
+  },
+  subscribeNotices(handler) {
+    return sb.channel('rt-notices')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leader_notices' }, payload => handler(payload.new))
+      .subscribe();
+  },
+  subscribeExecMedia(handler) {
+    return sb.channel('rt-exmedia')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'exercise_media' }, payload => handler(payload))
+      .subscribe();
+  }
+};
+
+window.Cloud = Cloud;
+
+// ====== Realtime: avisos do líder ======
+function bootCloudSync(){
+  if (!window.currentUser) return;
+  // Carrega últimos avisos uma vez (24h)
+  Cloud.listNotices(20).then(list => {
+    const since = Date.now() - 24*3600*1000;
+    list.filter(n => new Date(n.created_at).getTime() > since).reverse().forEach(n => {
+      if (n.by === window.currentUser) return; // não notifica o autor
+      try { addNotif('🔔', 'AVISO', n.message); } catch(e){}
+    });
+  });
+  // Subscribe novos
+  Cloud.subscribeNotices(n => {
+    if (n.by === window.currentUser) return;
+    try {
+      addNotif('🔔', 'AVISO', n.message);
+      showToast(n.message);
+    } catch(e){}
+  });
+}
+
+// Espera o app montar
+const _bootInterval = setInterval(() => {
+  if (window.currentUser) {
+    clearInterval(_bootInterval);
+    bootCloudSync();
+  }
+}, 400);
+setTimeout(() => clearInterval(_bootInterval), 15000);
+</script>
 </body>
 </html>
