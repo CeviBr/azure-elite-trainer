@@ -1439,6 +1439,7 @@ function doLogin(uid){
   const err=document.getElementById('err-'+uid);
   if(input.value===USERS[uid].pwd){
     currentUser=uid;
+    window.currentUser=uid;
     err.style.display='none';
     input.value='';
     localStorage.setItem('gst3r_current_user',uid);
