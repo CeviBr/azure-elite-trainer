@@ -3608,6 +3608,7 @@ const savedUser=_fromShell||localStorage.getItem('gst3r_current_user')||sessionS
 if(savedUser&&USERS[savedUser]){
   localStorage.setItem('gst3r_current_user',savedUser);
   currentUser=savedUser;
+  window.currentUser=savedUser;
   document.getElementById('login-page').classList.add('hidden');
   document.getElementById('app-page').classList.remove('hidden');
   initApp();
